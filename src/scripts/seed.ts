@@ -28,18 +28,28 @@ async function bootstrap() {
       console.log('权限已存在，跳过创建...');
     } else {
       const permissions = [
-        { code: 'user:view', name: '查看用户', description: '查看用户信息' },
-        { code: 'user:create', name: '创建用户', description: '创建新用户' },
-        { code: 'user:update', name: '更新用户', description: '更新用户信息' },
-        { code: 'user:delete', name: '删除用户', description: '删除用户' },
-        { code: 'role:view', name: '查看角色', description: '查看角色信息' },
-        { code: 'role:create', name: '创建角色', description: '创建新角色' },
-        { code: 'role:update', name: '更新角色', description: '更新角色信息' },
-        { code: 'role:delete', name: '删除角色', description: '删除角色' },
+        { code: 'user:view', name: 'viewUser', description: '查看用户信息' },
+        { code: 'user:create', name: 'createUser', description: '创建新用户' },
+        {
+          code: 'user:update',
+          name: 'updateUser',
+          description: '更新用户信息',
+        },
+        { code: 'user:delete', name: 'deleteUser', description: '删除用户' },
+        { code: 'role:view', name: 'viewRole', description: '查看角色信息' },
+        { code: 'role:create', name: 'createRole', description: '创建新角色' },
+        {
+          code: 'role:update',
+          name: 'updateRole',
+          description: '更新角色信息',
+        },
+        { code: 'role:delete', name: 'deleteRole', description: '删除角色' },
       ];
 
       for (const permission of permissions) {
-        const permissionEntity = permissionRepository.create(permission as DeepPartial<Permission>);
+        const permissionEntity = permissionRepository.create(
+          permission as DeepPartial<Permission>,
+        );
         await permissionRepository.save(permissionEntity);
       }
       console.log('基本权限创建完成');
@@ -60,7 +70,7 @@ async function bootstrap() {
       // 管理员角色（有所有权限）
       const adminRole = roleRepository.create({
         id: undefined,
-        name: '管理员',
+        name: 'admin',
         description: '系统管理员，拥有所有权限',
         permissions: allPermissions,
       });
@@ -73,7 +83,7 @@ async function bootstrap() {
 
       const userRole = roleRepository.create({
         id: undefined,
-        name: '普通用户',
+        name: 'ordinaryUser',
         description: '普通用户，只有基本查看权限',
         permissions: viewPermissions,
       });
@@ -95,7 +105,7 @@ async function bootstrap() {
       console.log('管理员用户已存在，跳过创建...');
     } else {
       const adminRole = await roleRepository.findOne({
-        where: { name: '管理员' },
+        where: { name: 'admin' },
       });
 
       if (!adminRole) {
@@ -132,7 +142,7 @@ async function bootstrap() {
       console.log('测试用户已存在，跳过创建...');
     } else {
       const userRole = await roleRepository.findOne({
-        where: { name: '普通用户' },
+        where: { name: 'ordinaryUser' },
       });
 
       if (!userRole) {

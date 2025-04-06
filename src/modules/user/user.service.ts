@@ -189,7 +189,7 @@ export class UserService {
 
     // 获取普通用户角色
     const userRole = await this.roleRepository.findOne({
-      where: { name: Equal('普通用户') },
+      where: { name: Equal('ordinaryUser') },
     });
     if (userRole) {
       user.roles = [userRole];
