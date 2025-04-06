@@ -1,10 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { LoggerService } from './common/logger';
 import { LogCategory } from './common/logger/logger.constants';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { PermissionGuard } from './modules/auth/permission.guard';
+import { Permission } from './modules/auth/auth.decorator';
 
 @Controller()
 export class AppController {
@@ -61,5 +64,13 @@ export class AppController {
         message: '数据库连接失败',
       };
     }
+  }
+
+  @Get('aaa')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @Permission('user:create')
+  getAaa(): string {
+    this.logger.info('访问 /aaa', LogCategory.SYSTEM, { method: 'getAaa' });
+    return '访问成功';
   }
 }

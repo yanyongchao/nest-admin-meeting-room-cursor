@@ -3,16 +3,23 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  Injectable,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ResponseDto } from '../dto/response.dto';
+import { LoggerService } from '../logger';
+import { LogCategory } from '../logger/logger.constants';
 
 /**
  * HTTP异常过滤器
  * 只捕获HttpException类型的异常并转换为标准的ResponseDto格式
+ * 同时将异常信息记录到日志系统中
  */
 @Catch(HttpException)
+@Injectable()
 export class HttpExceptionFilter implements ExceptionFilter {
+  constructor(private readonly logger: LoggerService) {}
+
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -51,6 +58,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
       typeof exceptionResponse === 'object' && 'errorCode' in exceptionResponse
         ? (exceptionResponse.errorCode as string)
         : `ERR_${status}`;
+
+    // 记录异常日志
+    this.logger.error(`HTTP异常: ${message}`, LogCategory.SYSTEM, exception, {
+      url: request.url,
+      method: request.method,
+      status,
+      errorCode,
+      query: request.query,
+      body: request.body,
+      headers: request.headers,
+      timestamp: new Date().toISOString(),
+    });
 
     // 构建标准响应
     const responseBody: ResponseDto<null> = {

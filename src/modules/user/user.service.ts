@@ -382,4 +382,46 @@ export class UserService {
       updateTime: user.updateTime,
     };
   }
+
+  // 检查用户是否拥有指定权限
+  async checkUserPermission(
+    userId: number,
+    permissionCode: string,
+  ): Promise<boolean> {
+    try {
+      // 获取用户及其角色
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['roles', 'roles.permissions'],
+      });
+
+      console.log('user====>', user);
+
+      if (!user) {
+        return false;
+      }
+
+      // 管理员拥有所有权限
+      if (user.isAdmin) {
+        return true;
+      }
+
+      // 检查用户的所有角色是否包含指定权限
+      for (const role of user.roles) {
+        if (
+          role.permissions &&
+          role.permissions.some(
+            (permission) => permission.code === permissionCode,
+          )
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error('检查用户权限出错:', error);
+      return false;
+    }
+  }
 }

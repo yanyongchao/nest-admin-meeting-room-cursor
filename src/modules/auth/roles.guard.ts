@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from './roles.decorator';
+import { ROLES_KEY } from './auth.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -23,7 +23,14 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
-    if (requiredRoles.includes('admin') && user.isAdmin) {
+    if (!user || !user.roles) {
+      throw new ForbiddenException('用户未登录或无角色信息');
+    }
+
+    // 判断用户角色是否包含所需角色中的任意一个
+    const hasRole = requiredRoles.some((role) => user.roles.includes(role));
+
+    if (hasRole) {
       return true;
     }
 
