@@ -8,6 +8,7 @@ import mysqlConfig from './config/mysql.config';
 import redisConfig from './config/redis.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from './redis/redis.module';
+import { ExampleModule } from './common/example/example.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RedisModule } from './redis/redis.module';
     }),
     LoggerModule,
     RedisModule,
+    ExampleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

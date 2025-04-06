@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { LoggerInterceptor, ensureLogDirectoryExists } from './common/logger';
 import { ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { ResponseInterceptor } from './common/interceptors';
+import { HttpExceptionFilter } from './common/filters';
 
 async function bootstrap() {
   // 确保日志目录存在
@@ -23,8 +25,14 @@ async function bootstrap() {
     // 获取Winston日志实例
     const logger = app.get(WINSTON_MODULE_PROVIDER);
 
-    // 设置全局日志拦截器
-    app.useGlobalInterceptors(new LoggerInterceptor(logger));
+    // 设置全局拦截器
+    app.useGlobalInterceptors(
+      new LoggerInterceptor(logger),
+      new ResponseInterceptor(),
+    );
+
+    // 设置全局异常过滤器
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     // 启动应用
     const port = process.env.PORT ?? 3000;
