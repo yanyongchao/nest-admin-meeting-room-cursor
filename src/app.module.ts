@@ -5,14 +5,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from './common/logger';
 import { envConfig } from './config/env.config';
 import mysqlConfig from './config/mysql.config';
+import redisConfig from './config/redis.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       ...envConfig,
-      load: [mysqlConfig],
+      load: [mysqlConfig, redisConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -23,6 +25,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       },
     }),
     LoggerModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
