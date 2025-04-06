@@ -11,37 +11,9 @@ import {
   checkLogDirectoryPermissions,
 } from './utils';
 
-// 自定义JSON格式，确保时间戳在最前面
+// 自定义JSON格式，确保时间戳在最前面并美化输出
 const orderedJsonFormat = winston.format.printf((info) => {
   const { timestamp, level, message, ...rest } = info;
-
-  // 移除不需要的嵌套属性
-  if (rest.service) {
-    delete rest.service;
-  }
-
-  // 处理错误堆栈，使其更可读
-  if (rest.error && typeof rest.error === 'object' && 'stack' in rest.error) {
-    const stackString = String(rest.error.stack);
-    rest.error.stack = stackString.split('\n').map((line) => line.trim());
-  }
-
-  // 如果响应数据过大，只保留关键信息
-  if (rest.response && typeof rest.response === 'object') {
-    try {
-      const jsonSize = JSON.stringify(rest.response).length;
-      if (jsonSize > 1000) {
-        // 如果响应大于1KB
-        rest.response = {
-          _truncated: true,
-          _size: `${Math.round(jsonSize / 1024)}KB`,
-          summary: '响应数据过大，已截断',
-        };
-      }
-    } catch (e) {
-      rest.response = '[无法序列化的响应]';
-    }
-  }
 
   // 创建带有顺序的对象
   const orderedObj = {
@@ -53,12 +25,28 @@ const orderedJsonFormat = winston.format.printf((info) => {
   // 添加剩余的属性
   const fullObj = { ...orderedObj, ...rest };
 
-  // 转换为JSON字符串
-  return JSON.stringify(fullObj);
+  // 转换为美化的JSON字符串，使用2个空格缩进
+  return JSON.stringify(fullObj, null, 2);
+});
+
+// 压缩版的JSON格式，用于生产环境
+const compactJsonFormat = winston.format.printf((info) => {
+  const { timestamp, level, message, ...rest } = info;
+
+  // 创建带有顺序的对象
+  const orderedObj = {
+    timestamp,
+    level: level.toUpperCase(),
+    message,
+    ...rest,
+  };
+
+  // 返回单行JSON
+  return JSON.stringify(orderedObj);
 });
 
 // 日志文件格式化配置
-const createFileLogFormat = (detailed = false) => {
+const createFileLogFormat = (detailed = false, isProduction = false) => {
   const formats = [
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.errors({ stack: true }),
@@ -75,7 +63,9 @@ const createFileLogFormat = (detailed = false) => {
     );
   }
 
-  formats.push(orderedJsonFormat);
+  // 根据环境选择格式
+  formats.push(isProduction ? compactJsonFormat : orderedJsonFormat);
+
   return winston.format.combine(...formats);
 };
 
@@ -98,10 +88,10 @@ export const loggerConfig = (
   }
 
   // 基本日志格式
-  const basicFileLogFormat = createFileLogFormat();
+  const basicFileLogFormat = createFileLogFormat(false, isProduction);
 
   // 详细日志格式(包含更多信息，用于错误日志)
-  const detailedFileLogFormat = createFileLogFormat(true);
+  const detailedFileLogFormat = createFileLogFormat(true, isProduction);
 
   // 控制台日志格式
   const consoleFormat = winston.format.combine(

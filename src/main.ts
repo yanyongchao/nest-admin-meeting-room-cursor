@@ -1,10 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  LoggerInterceptor,
-  LoggerExceptionFilter,
-  ensureLogDirectoryExists,
-} from './common/logger';
+import { LoggerInterceptor, ensureLogDirectoryExists } from './common/logger';
 import { ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
@@ -29,9 +25,6 @@ async function bootstrap() {
 
     // 设置全局日志拦截器
     app.useGlobalInterceptors(new LoggerInterceptor(logger));
-
-    // 设置全局异常过滤器
-    app.useGlobalFilters(new LoggerExceptionFilter(logger));
 
     // 启动应用
     const port = process.env.PORT ?? 3000;

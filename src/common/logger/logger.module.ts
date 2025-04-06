@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { loggerConfig } from './logger.config';
 import { LoggerService } from './logger.service';
 import { LoggerInterceptor } from './logger.interceptor';
-import { LoggerExceptionFilter } from './logger.filter';
 
 @Module({
   imports: [
@@ -14,7 +13,7 @@ import { LoggerExceptionFilter } from './logger.filter';
       useFactory: (configService: ConfigService) => loggerConfig(configService),
     }),
   ],
-  providers: [LoggerService, LoggerInterceptor, LoggerExceptionFilter],
-  exports: [LoggerService, LoggerInterceptor, LoggerExceptionFilter],
+  providers: [LoggerService, LoggerInterceptor],
+  exports: [LoggerService, LoggerInterceptor],
 })
 export class LoggerModule {}
