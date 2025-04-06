@@ -9,6 +9,8 @@ import redisConfig from './config/redis.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from './redis/redis.module';
 import { ExampleModule } from './common/example/example.module';
+import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { ExampleModule } from './common/example/example.module';
     LoggerModule,
     RedisModule,
     ExampleModule,
+    UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
