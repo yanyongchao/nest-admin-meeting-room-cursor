@@ -10,7 +10,7 @@ export default registerAs('database', (): TypeOrmModuleOptions => {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
-    entities: [join(__dirname, '../../entities/**/*.entity{.ts,.js}')],
+    entities: [join(__dirname, '../**/*.entity{.ts,.js}')],
     synchronize: process.env.NODE_ENV !== 'production', // 非生产环境自动同步数据库结构
     logging: process.env.NODE_ENV !== 'production',
     charset: 'utf8mb4',
